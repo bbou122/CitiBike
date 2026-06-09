@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NYC Citi Bike 2023 — Braden Bourg</title>
+<style>
+:root {
+  --blue:    #0057FF;
+  --blue-dk: #003DBF;
+  --teal:    #00B4A0;
+  --orange:  #FF6B35;
+  --yellow:  #F5C400;
+  --bg:      #F0F4F8;
+  --card:    #FFFFFF;
+  --text:    #0D1B2A;
+  --muted:   #64748B;
+  --border:  #DDE3EC;
+  --hero-bg: #0D1B2A;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+/* ── HERO ── */
+.hero {
+  background: var(--hero-bg);
+  color: #fff;
+  padding: 72px 48px 64px;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -80px; right: -120px;
+  width: 600px; height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,87,255,0.25) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 32px;
+  align-items: end;
+}
+.hero-eyebrow {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--blue);
+  background: rgba(0,87,255,0.15);
+  border: 1px solid rgba(0,87,255,0.4);
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  margin-bottom: 20px;
+}
+.hero h1 {
+  font-size: clamp(2rem, 4vw, 3.4rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -.02em;
+  margin-bottom: 16px;
+}
+.hero h1 span { color: var(--blue); }
+.hero-sub {
+  font-size: 17px;
+  color: rgba(255,255,255,0.6);
+  max-width: 560px;
+  line-height: 1.7;
+}
+.hero-meta {
+  text-align: right;
+  padding-bottom: 4px;
+}
+.hero-meta .author {
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+}
+.hero-meta .source {
+  font-size: 13px;
+  color: rgba(255,255,255,0.45);
+  margin-top: 6px;
+}
+.hero-band {
+  background: rgba(0,87,255,0.1);
+  border-top: 1px solid rgba(0,87,255,0.3);
+  padding: 20px 48px;
+  display: flex;
+  gap: 48px;
+  justify-content: center;
+}
+.hero-band-stat { text-align: center; }
+.hero-band-stat .num { font-size: 28px; font-weight: 800; color: #fff; }
+.hero-band-stat .lbl { font-size: 12px; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing:.08em; }
+
+/* ── LAYOUT ── */
+.page { max-width: 1100px; margin: 0 auto; padding: 0 24px 80px; }
+section { margin-top: 64px; }
+.section-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--blue);
+  margin-bottom: 8px;
+}
+.section-heading {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.section-sub {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 28px;
+}
+
+/* ── CARDS ── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 28px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.04);
+}
+.card-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
+/* ── KPI GRID ── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 16px;
+}
+.kpi-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px 20px;
+  position: relative;
+  overflow: hidden;
+}
+.kpi-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--accent, var(--blue));
+  border-radius: 0 0 14px 14px;
+}
+.kpi-icon { font-size: 22px; margin-bottom: 10px; }
+.kpi-label { font-size: 12px; color: var(--muted); font-weight: 600; letter-spacing:.06em; text-transform:uppercase; }
+.kpi-value { font-size: 2.2rem; font-weight: 800; color: var(--text); line-height: 1.1; margin: 6px 0 4px; }
+.kpi-note  { font-size: 13px; color: var(--muted); }
+
+/* ── CHART GRID ── */
+.chart-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.chart-3col { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 20px; }
+.chart-full { display: grid; grid-template-columns: 1fr; gap: 20px; }
+
+svg text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+
+/* ── INSIGHTS ── */
+.insight-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+.insight-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+}
+.insight-num {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--blue);
+  margin-bottom: 8px;
+}
+.insight-head { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+.insight-body { font-size: 14px; color: var(--muted); line-height: 1.65; }
+
+/* ── STATIONS TABLE ── */
+.station-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.station-row:last-child { border-bottom: none; }
+.station-rank { font-size: 12px; color: var(--muted); font-weight: 700; width: 24px; }
+.station-name { font-size: 13px; font-weight: 600; flex: 1; }
+.station-bar-wrap { width: 180px; }
+.station-bar-bg { background: #EEF2FF; border-radius: 4px; height: 8px; overflow: hidden; }
+.station-bar-fill { height: 100%; border-radius: 4px; background: var(--blue); transition: width .5s ease; }
+.station-val { font-size: 12px; color: var(--muted); width: 56px; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* ── FOOTER ── */
+footer {
+  background: var(--hero-bg);
+  color: rgba(255,255,255,0.4);
+  text-align: center;
+  padding: 32px 24px;
+  font-size: 13px;
+  margin-top: 80px;
+}
+footer a { color: rgba(255,255,255,0.6); }
+
+/* ── TOOLTIP ── */
+.chart-tooltip {
+  position: fixed;
+  background: var(--text);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .15s;
+  z-index: 1000;
+  white-space: nowrap;
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<header>
+  <div class="hero">
+    <div class="hero-inner">
+      <div>
+        <div class="hero-eyebrow">Data Analysis Portfolio</div>
+        <h1>NYC Citi Bike<br><span>2023 Ridership</span> Analysis</h1>
+        <p class="hero-sub">Full-year exploration of 35.1 million trips across New York City's bike-share network — uncovering commuter behavior, seasonal patterns, and the electric fleet transition.</p>
+      </div>
+      <div class="hero-meta">
+        <div class="author">Braden Bourg</div>
+        <div class="source">Source: Citi Bike System Data, 2023<br>35,106,986 trips · 12 months</div>
+      </div>
+    </div>
+  </div>
+  <div class="hero-band">
+    <div class="hero-band-stat"><div class="num">35.1M</div><div class="lbl">Total Trips</div></div>
+    <div class="hero-band-stat"><div class="num">81.2%</div><div class="lbl">Member Rides</div></div>
+    <div class="hero-band-stat"><div class="num">50.1%</div><div class="lbl">Electric Bikes</div></div>
+    <div class="hero-band-stat"><div class="num">5–10 min</div><div class="lbl">Median Duration</div></div>
+    <div class="hero-band-stat"><div class="num">5pm</div><div class="lbl">Peak Hour</div></div>
+  </div>
+</header>
+
+<div class="page">
+
+  <!-- KPIs -->
+  <section>
+    <div class="kpi-grid">
+      <div class="kpi-card" style="--accent:#0057FF">
+        <div class="kpi-icon">🚲</div>
+        <div class="kpi-label">Total Trips</div>
+        <div class="kpi-value">35.1M</div>
+        <div class="kpi-note">~96,000 rides per day on average</div>
+      </div>
+      <div class="kpi-card" style="--accent:#00B4A0">
+        <div class="kpi-icon">📅</div>
+        <div class="kpi-label">Peak Month</div>
+        <div class="kpi-value">Aug</div>
+        <div class="kpi-note">3,964,177 trips · 128K/day avg</div>
+      </div>
+      <div class="kpi-card" style="--accent:#FF6B35">
+        <div class="kpi-icon">⚡</div>
+        <div class="kpi-label">Electric Share</div>
+        <div class="kpi-value">50.1%</div>
+        <div class="kpi-note">Rose from 50% in Jan to 62% by Dec</div>
+      </div>
+      <div class="kpi-card" style="--accent:#F5C400">
+        <div class="kpi-icon">🏙️</div>
+        <div class="kpi-label">Busiest Station</div>
+        <div class="kpi-value" style="font-size:1.15rem;padding-top:6px">W 21 St<br>&amp; 6 Ave</div>
+        <div class="kpi-note">139,932 departures in 2023</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MONTHLY VOLUME -->
+  <section>
+    <div class="section-title">Seasonality</div>
+    <div class="section-heading">Monthly Trip Volume</div>
+    <div class="section-sub">Ridership swells 2.3× from winter low (Feb: 1.7M) to summer peak (Aug: 4.0M), with a sustained high plateau from May through October.</div>
+    <div class="card">
+      <div class="card-title">Trips per Month — Members vs. Casual Riders</div>
+      <div id="chart-monthly"></div>
+    </div>
+  </section>
+
+  <!-- HOURLY + DOW -->
+  <section>
+    <div class="section-title">Temporal Patterns</div>
+    <div class="section-heading">When New Yorkers Ride</div>
+    <div class="section-sub">A sharp 8am spike and dominant 5pm peak reveal a primarily commuter-driven ridership, with sustained afternoon activity on weekends.</div>
+    <div class="chart-2col">
+      <div class="card">
+        <div class="card-title">Rides by Hour of Day (all year)</div>
+        <div id="chart-hourly"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Rides by Day of Week (all year)</div>
+        <div id="chart-dow"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RIDER TYPE + BIKE TYPE + DURATION -->
+  <section>
+    <div class="section-title">Fleet &amp; Rider Profile</div>
+    <div class="section-heading">Who's Riding and How</div>
+    <div class="section-sub">Members dominate daily use; electric bikes have reached full parity; most trips are short urban hops under 15 minutes.</div>
+    <div class="chart-3col">
+      <div class="card">
+        <div class="card-title">Trip Duration Distribution</div>
+        <div id="chart-duration"></div>
+      </div>
+      <div class="card" style="display:flex;flex-direction:column;align-items:center;justify-content:center">
+        <div class="card-title" style="text-align:center;width:100%">Member vs. Casual</div>
+        <div id="chart-donut-rider"></div>
+        <div style="margin-top:16px;display:flex;gap:20px;font-size:13px">
+          <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:50%;background:#0057FF;display:inline-block"></span>Member 81.2%</span>
+          <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:50%;background:#FF6B35;display:inline-block"></span>Casual 18.8%</span>
+        </div>
+      </div>
+      <div class="card" style="display:flex;flex-direction:column;align-items:center;justify-content:center">
+        <div class="card-title" style="text-align:center;width:100%">Classic vs. Electric</div>
+        <div id="chart-donut-bike"></div>
+        <div style="margin-top:16px;display:flex;gap:20px;font-size:13px">
+          <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:50%;background:#0057FF;display:inline-block"></span>Classic 49.9%</span>
+          <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:50%;background:#00B4A0;display:inline-block"></span>Electric 50.1%</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ELECTRIC TREND -->
+  <section>
+    <div class="section-title">Fleet Transition</div>
+    <div class="section-heading">Electric Share by Month</div>
+    <div class="section-sub">Electric bike adoption grew steadily through 2023 — from 50% in January to 62% by December — reflecting both expanded fleet deployment and strong rider preference.</div>
+    <div class="card">
+      <div class="card-title">% Electric Rides per Month</div>
+      <div id="chart-electric"></div>
+    </div>
+  </section>
+
+  <!-- TOP STATIONS -->
+  <section>
+    <div class="section-title">Geographic Demand</div>
+    <div class="section-heading">Top 10 Busiest Stations</div>
+    <div class="section-sub">High-volume stations cluster in Midtown, Chelsea, and the Financial District — connecting subway hubs to office corridors and waterfront bike lanes.</div>
+    <div class="chart-2col">
+      <div class="card">
+        <div class="card-title">By Departures (outbound trips)</div>
+        <div id="stations-dep"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">By Arrivals (inbound trips)</div>
+        <div id="stations-arr"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KEY INSIGHTS -->
+  <section>
+    <div class="section-title">Analysis</div>
+    <div class="section-heading">Key Findings</div>
+    <div class="section-sub">What the data tells us about urban mobility patterns in New York City.</div>
+    <div class="insight-grid">
+      <div class="insight-card">
+        <div class="insight-num">2.3×</div>
+        <div class="insight-head">Summer Surge</div>
+        <div class="insight-body">Trip volume peaks in August at 4.0M — more than double February's 1.7M floor. The May–October period accounts for 63% of all 2023 ridership, signaling strong weather sensitivity despite a large year-round member base.</div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-num">8am / 5pm</div>
+        <div class="insight-head">Commuter-First Network</div>
+        <div class="insight-body">The dual rush-hour peaks (8am: 2.1M trips, 5pm: 3.2M trips) and weekday dominance confirm Citi Bike primarily serves daily commuters. Wednesday and Thursday are the two highest-volume days of the year.</div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-num">81%</div>
+        <div class="insight-head">Strong Membership Loyalty</div>
+        <div class="insight-body">More than 4 in 5 trips are taken by annual members. The membership rate stays elevated even in summer when casual tourist demand is highest, suggesting a deep, habitual user base beyond seasonal visitors.</div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-num">50% → 62%</div>
+        <div class="insight-head">Electric Inflection Point</div>
+        <div class="insight-body">Electric bikes reached exact parity with classic bikes in January and continued climbing, finishing December at 62%. This trend likely reflects both ongoing fleet expansion and rider preference — e-bikes enable longer trips and faster speeds.</div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-num">67%</div>
+        <div class="insight-head">Hyper-Short Trips</div>
+        <div class="insight-body">Two-thirds of all rides are completed in under 15 minutes. Combined with the commuter signal, this positions Citi Bike as a last-mile connector rather than a recreational vehicle — bridging subway stops, offices, and residential blocks.</div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-num">~96K</div>
+        <div class="insight-head">Daily Ride Baseline</div>
+        <div class="insight-body">Averaging 96,000 trips per calendar day across the year — and over 128,000 per day in August — Citi Bike has embedded itself as a genuine transit mode in NYC, not merely a tourism amenity. The system is now structurally load-bearing for urban mobility.</div>
+      </div>
+    </div>
+  </section>
+
+</div><!-- /page -->
+
+<footer>
+  <p>NYC Citi Bike 2023 Ridership Analysis &nbsp;·&nbsp; Braden Bourg &nbsp;·&nbsp; <a href="https://citibikenyc.com/system-data" target="_blank">Data: Citi Bike System Data</a></p>
+</footer>
+
+<div class="chart-tooltip" id="tooltip"></div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────
+const MONTHLY = [
+  {label:"Jan",total:1795405,member:1559700,casual:235705,classic:893083,electric:902322},
+  {label:"Feb",total:1696166,member:1491811,casual:204355,classic:786915,electric:909251},
+  {label:"Mar",total:2118930,member:1834556,casual:284374,classic:1087574,electric:1031356},
+  {label:"Apr",total:2749713,member:2229124,casual:520589,classic:1466494,electric:1283219},
+  {label:"May",total:3453144,member:2777332,casual:675812,classic:2067494,electric:1385650},
+  {label:"Jun",total:3451542,member:2752074,casual:699468,classic:1951684,electric:1499858},
+  {label:"Jul",total:3659577,member:2815494,casual:844083,classic:1880614,electric:1778963},
+  {label:"Aug",total:3964177,member:3071665,casual:892512,classic:1971541,electric:1992636},
+  {label:"Sep",total:3471148,member:2745958,casual:725190,classic:1684956,electric:1786192},
+  {label:"Oct",total:3725334,member:3012306,casual:713028,classic:1724361,electric:2000973},
+  {label:"Nov",total:2816976,member:2354002,casual:462974,classic:1145864,electric:1671112},
+  {label:"Dec",total:2204874,member:1869769,casual:335105,classic:840582,electric:1364292},
+];
+const HOURLY = [483358,298827,192860,127607,113136,248226,675986,1401027,2119803,1791318,1556371,1693790,1920486,2037388,2220126,2412941,2661575,3215711,3016673,2293172,1639663,1238787,1007669,740486];
+const DOW = {Mon:4731925,Tue:5284615,Wed:5539086,Thu:5439460,Fri:5140965,Sat:4654370,Sun:4316289};
+const DURATION = [
+  {label:"0–5 min",  val:7923919},
+  {label:"5–10 min", val:10745669},
+  {label:"10–15 min",val:6341330},
+  {label:"15–20 min",val:3608994},
+  {label:"20–30 min",val:3558529},
+  {label:"30–45 min",val:1870898},
+  {label:"45–60 min",val:539451},
+  {label:"60+ min",  val:517872},
+];
+const TOP_DEP = [
+  [139932,"W 21 St & 6 Ave"],[115744,"Broadway & W 58 St"],
+  [110814,"West St & Chambers St"],[107445,"University Pl & E 14 St"],
+  [107216,"11 Ave & W 41 St"],[104947,"1 Ave & E 68 St"],
+  [102917,"Broadway & W 25 St"],[102698,"W 31 St & 7 Ave"],
+  [99761,"6 Ave & W 33 St"],[98400,"E 17 St & Broadway"],
+];
+const TOP_ARR = [
+  [140324,"W 21 St & 6 Ave"],[112539,"Broadway & W 58 St"],
+  [111400,"West St & Chambers St"],[109636,"University Pl & E 14 St"],
+  [107186,"11 Ave & W 41 St"],[105408,"1 Ave & E 68 St"],
+  [102917,"Broadway & W 25 St"],[102751,"W 31 St & 7 Ave"],
+  [99964,"E 17 St & Broadway"],[99241,"6 Ave & W 33 St"],
+];
+
+// ── HELPERS ───────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const fmt = n => n >= 1e6 ? (n/1e6).toFixed(1)+'M' : n >= 1e3 ? Math.round(n/1000)+'K' : n.toString();
+const fmtFull = n => n.toLocaleString();
+const tip = $('tooltip');
+
+function showTip(e, html) {
+  tip.innerHTML = html;
+  tip.style.opacity = '1';
+  tip.style.left = (e.clientX + 14) + 'px';
+  tip.style.top  = (e.clientY - 36) + 'px';
+}
+function hideTip() { tip.style.opacity = '0'; }
+
+function makeSVG(w, h) {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+  svg.setAttribute('width','100%');
+  svg.setAttribute('height', h);
+  return svg;
+}
+function svgEl(tag, attrs) {
+  const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  Object.entries(attrs).forEach(([k,v]) => el.setAttribute(k,v));
+  return el;
+}
+function svgText(txt, x, y, attrs={}) {
+  const el = svgEl('text', {x, y, ...attrs});
+  el.textContent = txt;
+  return el;
+}
+
+// ── CHART: MONTHLY STACKED BARS ────────────────────────────────────────
+(function() {
+  const W=900, H=260, PT=20, PB=36, PL=48, PR=20;
+  const cw = W-PL-PR, ch = H-PT-PB;
+  const maxVal = Math.max(...MONTHLY.map(m=>m.total));
+  const bw = Math.floor(cw/MONTHLY.length) - 4;
+  const svg = makeSVG(W,H);
+
+  // Grid lines
+  [0,1,2,3,4].forEach(i => {
+    const y = PT + ch - (i/4)*ch;
+    const grid = svgEl('line',{x1:PL,y1:y,x2:W-PR,y2:y,stroke:'#E2E8F0','stroke-width':'1'});
+    svg.appendChild(grid);
+    if(i>0){
+      const label = svgText(fmt(Math.round(maxVal*i/4)), PL-6, y+4, {'text-anchor':'end','font-size':'11','fill':'#94A3B8'});
+      svg.appendChild(label);
+    }
+  });
+
+  MONTHLY.forEach((m,i) => {
+    const x = PL + i*(cw/MONTHLY.length) + (cw/MONTHLY.length - bw)/2;
+    const memberH = (m.member/maxVal)*ch;
+    const casualH = (m.casual/maxVal)*ch;
+    const yMember = PT + ch - memberH - casualH;
+    const yCasual = PT + ch - casualH;
+
+    const memberBar = svgEl('rect',{x,y:yMember,width:bw,height:memberH,fill:'#0057FF',rx:'3'});
+    const casualBar = svgEl('rect',{x,y:yCasual,width:bw,height:casualH,fill:'#FF6B35',rx:'3'});
+
+    [memberBar, casualBar].forEach(bar => {
+      bar.style.cursor = 'pointer';
+      bar.addEventListener('mousemove', e => showTip(e, `<strong>${m.label}</strong><br>${fmtFull(m.total)} trips<br>Member: ${fmt(m.member)} · Casual: ${fmt(m.casual)}`));
+      bar.addEventListener('mouseleave', hideTip);
+      svg.appendChild(bar);
+    });
+
+    const lbl = svgText(m.label, x+bw/2, H-PB+14, {'text-anchor':'middle','font-size':'11','fill':'#64748B','font-weight':'500'});
+    svg.appendChild(lbl);
+    const val = svgText(fmt(m.total), x+bw/2, yMember-5, {'text-anchor':'middle','font-size':'10','fill':'#64748B'});
+    svg.appendChild(val);
+  });
+
+  // Legend
+  const leg = svgEl('g',{});
+  leg.appendChild(svgEl('rect',{x:PL,y:4,width:10,height:10,fill:'#0057FF',rx:'2'}));
+  leg.appendChild(svgText('Member',PL+14,13,{'font-size':'11','fill':'#64748B'}));
+  leg.appendChild(svgEl('rect',{x:PL+80,y:4,width:10,height:10,fill:'#FF6B35',rx:'2'}));
+  leg.appendChild(svgText('Casual',PL+94,13,{'font-size':'11','fill':'#64748B'}));
+  svg.appendChild(leg);
+
+  $('chart-monthly').appendChild(svg);
+})();
+
+// ── CHART: HOURLY LINE/AREA ────────────────────────────────────────────
+(function() {
+  const W=440, H=220, PT=16, PB=28, PL=44, PR=12;
+  const cw=W-PL-PR, ch=H-PT-PB;
+  const maxV = Math.max(...HOURLY);
+  const svg = makeSVG(W,H);
+
+  // Grid
+  [0,1,2,3].forEach(i => {
+    const y = PT + ch - (i/3)*ch;
+    svg.appendChild(svgEl('line',{x1:PL,y1:y,x2:W-PR,y2:y,stroke:'#EEF2FF','stroke-width':'1'}));
+    if(i>0) svg.appendChild(svgText(fmt(Math.round(maxV*i/3)),PL-5,y+4,{'text-anchor':'end','font-size':'10','fill':'#94A3B8'}));
+  });
+
+  // Area path
+  const pts = HOURLY.map((v,i) => [PL + (i/(HOURLY.length-1))*cw, PT+ch-(v/maxV)*ch]);
+  const pathD = 'M'+pts.map(p=>p.join(',')).join('L');
+  const areaD = pathD + `L${pts[pts.length-1][0]},${PT+ch} L${pts[0][0]},${PT+ch} Z`;
+  svg.appendChild(svgEl('path',{d:areaD,fill:'rgba(0,87,255,0.1)'}));
+  svg.appendChild(svgEl('path',{d:pathD,fill:'none',stroke:'#0057FF','stroke-width':'2','stroke-linejoin':'round'}));
+
+  // Hover dots
+  pts.forEach(([x,y],i) => {
+    const dot = svgEl('circle',{cx:x,cy:y,r:'4',fill:'#0057FF',opacity:'0',style:'cursor:pointer'});
+    dot.addEventListener('mousemove', e => showTip(e, `<strong>${i}:00–${i+1}:00</strong><br>${fmtFull(HOURLY[i])} trips`));
+    dot.addEventListener('mouseleave', hideTip);
+    dot.addEventListener('mouseenter', () => dot.setAttribute('opacity','1'));
+    dot.addEventListener('mouseleave', () => dot.setAttribute('opacity','0'));
+    svg.appendChild(dot);
+  });
+
+  // X labels (every 3h)
+  [0,3,6,9,12,15,18,21,23].forEach(h => {
+    const x = PL + (h/23)*cw;
+    svg.appendChild(svgText(h+'h', x, H-PB+12, {'text-anchor':'middle','font-size':'10','fill':'#94A3B8'}));
+  });
+
+  // Highlight 5pm
+  const x17 = PL+(17/23)*cw;
+  svg.appendChild(svgEl('line',{x1:x17,y1:PT,x2:x17,y2:PT+ch,stroke:'#0057FF','stroke-width':'1','stroke-dasharray':'3,3',opacity:'.5'}));
+  svg.appendChild(svgText('Peak 5pm',x17+3,PT+12,{'font-size':'10','fill':'#0057FF','font-weight':'600'}));
+
+  $('chart-hourly').appendChild(svg);
+})();
+
+// ── CHART: DAY OF WEEK ────────────────────────────────────────────────
+(function() {
+  const W=440, H=220, PT=16, PB=28, PL=44, PR=12;
+  const cw=W-PL-PR, ch=H-PT-PB;
+  const days = Object.entries(DOW);
+  const maxV = Math.max(...days.map(d=>d[1]));
+  const bw = Math.floor(cw/days.length)-6;
+  const svg = makeSVG(W,H);
+  const colors = ['#4B78FF','#0057FF','#003DBF','#0057FF','#4B78FF','#00B4A0','#00C9B8'];
+
+  [0,1,2,3].forEach(i => {
+    const y=PT+ch-(i/3)*ch;
+    svg.appendChild(svgEl('line',{x1:PL,y1:y,x2:W-PR,y2:y,stroke:'#EEF2FF','stroke-width':'1'}));
+    if(i>0) svg.appendChild(svgText(fmt(Math.round(maxV*i/3)),PL-5,y+4,{'text-anchor':'end','font-size':'10','fill':'#94A3B8'}));
+  });
+
+  days.forEach(([day,val],i) => {
+    const x = PL + i*(cw/days.length)+(cw/days.length-bw)/2;
+    const barH = (val/maxV)*ch;
+    const isWknd = i>=5;
+    const bar = svgEl('rect',{x,y:PT+ch-barH,width:bw,height:barH,fill:colors[i],rx:'4'});
+    bar.style.cursor='pointer';
+    bar.addEventListener('mousemove', e=>showTip(e,`<strong>${day}</strong><br>${fmtFull(val)} trips`));
+    bar.addEventListener('mouseleave', hideTip);
+    svg.appendChild(bar);
+    svg.appendChild(svgText(day,x+bw/2,H-PB+12,{'text-anchor':'middle','font-size':'11','fill':isWknd?'#00B4A0':'#64748B','font-weight': isWknd?'700':'400'}));
+  });
+
+  $('chart-dow').appendChild(svg);
+})();
+
+// ── CHART: DURATION ───────────────────────────────────────────────────
+(function() {
+  const W=440, H=230, PT=16, PB=28, PL=62, PR=12;
+  const cw=W-PL-PR, ch=H-PT-PB;
+  const maxV = Math.max(...DURATION.map(d=>d.val));
+  const bh = Math.floor(ch/DURATION.length)-4;
+  const svg = makeSVG(W,H);
+
+  // Vertical grid
+  [0,1,2,3].forEach(i=>{
+    const x=PL+(i/3)*cw;
+    svg.appendChild(svgEl('line',{x1:x,y1:PT,x2:x,y2:PT+ch,stroke:'#EEF2FF','stroke-width':'1'}));
+    if(i>0) svg.appendChild(svgText(fmt(Math.round(maxV*i/3)),x,PT+ch+12,{'text-anchor':'middle','font-size':'10','fill':'#94A3B8'}));
+  });
+
+  DURATION.forEach((d,i) => {
+    const y = PT+i*(ch/DURATION.length)+(ch/DURATION.length-bh)/2;
+    const barW = (d.val/maxV)*cw;
+    const pct = (d.val/DURATION.reduce((a,x)=>a+x.val,0)*100).toFixed(1);
+    const bar = svgEl('rect',{x:PL,y,width:barW,height:bh,fill:i<3?'#0057FF':'#93AEFD',rx:'3'});
+    bar.style.cursor='pointer';
+    bar.addEventListener('mousemove', e=>showTip(e,`<strong>${d.label}</strong><br>${fmtFull(d.val)} trips (${pct}%)`));
+    bar.addEventListener('mouseleave', hideTip);
+    svg.appendChild(bar);
+    svg.appendChild(svgText(d.label,PL-5,y+bh/2+4,{'text-anchor':'end','font-size':'11','fill':'#64748B'}));
+    if(barW>48) svg.appendChild(svgText(pct+'%',PL+barW-5,y+bh/2+4,{'text-anchor':'end','font-size':'10','fill':'#fff','font-weight':'600'}));
+  });
+
+  $('chart-duration').appendChild(svg);
+})();
+
+// ── DONUTS ────────────────────────────────────────────────────────────
+function donut(id, pct, color1, color2) {
+  const W=160, H=160, cx=80, cy=80, r=58, sw=20;
+  const svg = makeSVG(W,H);
+  const circ = 2*Math.PI*r;
+  const bg = svgEl('circle',{cx,cy,r,fill:'none',stroke:'#EEF2FF','stroke-width':sw});
+  const fg = svgEl('circle',{cx,cy,r,fill:'none',stroke:color1,'stroke-width':sw,
+    'stroke-dasharray':`${circ*pct} ${circ*(1-pct)}`,
+    'stroke-dashoffset': circ*0.25,
+    'stroke-linecap':'round'});
+  const num = svgEl('text',{x:cx,y:cy+6,'text-anchor':'middle','font-size':'22','font-weight':'800','fill':'#0D1B2A'});
+  num.textContent = Math.round(pct*100)+'%';
+  svg.appendChild(bg); svg.appendChild(fg); svg.appendChild(num);
+  $(id).appendChild(svg);
+}
+donut('chart-donut-rider', 0.812, '#0057FF', '#FF6B35');
+donut('chart-donut-bike',  0.501, '#00B4A0', '#0057FF');
+
+// ── CHART: ELECTRIC TREND ─────────────────────────────────────────────
+(function() {
+  const W=900, H=200, PT=20, PB=32, PL=48, PR=20;
+  const cw=W-PL-PR, ch=H-PT-PB;
+  const pcts = MONTHLY.map(m=>m.electric/m.total);
+  const minP=0.48, maxP=0.65;
+  const svg = makeSVG(W,H);
+
+  // Grid + y-axis
+  [0,1,2,3,4].forEach(i=>{
+    const p = minP + (i/4)*(maxP-minP);
+    const y = PT + ch - ((p-minP)/(maxP-minP))*ch;
+    svg.appendChild(svgEl('line',{x1:PL,y1:y,x2:W-PR,y2:y,stroke:'#E2E8F0','stroke-width':'1'}));
+    svg.appendChild(svgText(Math.round(p*100)+'%',PL-6,y+4,{'text-anchor':'end','font-size':'11','fill':'#94A3B8'}));
+  });
+
+  const pts = pcts.map((p,i)=>[PL+(i/(pcts.length-1))*cw, PT+ch-((p-minP)/(maxP-minP))*ch]);
+  const pathD='M'+pts.map(p=>p.join(',')).join('L');
+  const areaD=pathD+`L${pts[pts.length-1][0]},${PT+ch} L${pts[0][0]},${PT+ch} Z`;
+  svg.appendChild(svgEl('path',{d:areaD,fill:'rgba(0,180,160,0.12)'}));
+  svg.appendChild(svgEl('path',{d:pathD,fill:'none',stroke:'#00B4A0','stroke-width':'2.5','stroke-linejoin':'round'}));
+
+  pts.forEach(([x,y],i)=>{
+    const dot=svgEl('circle',{cx:x,cy:y,r:'5',fill:'#00B4A0',stroke:'#fff','stroke-width':'2'});
+    dot.style.cursor='pointer';
+    dot.addEventListener('mousemove',e=>showTip(e,`<strong>${MONTHLY[i].label}</strong>: ${(pcts[i]*100).toFixed(1)}% electric`));
+    dot.addEventListener('mouseleave',hideTip);
+    svg.appendChild(dot);
+    svg.appendChild(svgText(MONTHLY[i].label,x,H-PB+14,{'text-anchor':'middle','font-size':'11','fill':'#64748B','font-weight':'500'}));
+  });
+
+  // 50% reference
+  const y50=PT+ch-((0.50-minP)/(maxP-minP))*ch;
+  svg.appendChild(svgEl('line',{x1:PL,y1:y50,x2:W-PR,y2:y50,stroke:'#94A3B8','stroke-width':'1','stroke-dasharray':'4,4'}));
+  svg.appendChild(svgText('50% parity',W-PR+2,y50+4,{'font-size':'10','fill':'#94A3B8'}));
+
+  $('chart-electric').appendChild(svg);
+})();
+
+// ── STATIONS BARS ────────────────────────────────────────────────────
+function renderStations(id, data) {
+  const maxV = data[0][0];
+  const container = $(id);
+  data.forEach(([count, name], i) => {
+    const pct = count/maxV*100;
+    const row = document.createElement('div');
+    row.className = 'station-row';
+    row.innerHTML = `
+      <span class="station-rank">${i+1}</span>
+      <span class="station-name">${name}</span>
+      <div class="station-bar-wrap">
+        <div class="station-bar-bg"><div class="station-bar-fill" style="width:${pct}%"></div></div>
+      </div>
+      <span class="station-val">${fmtFull(count)}</span>
+    `;
+    container.appendChild(row);
+  });
+}
+renderStations('stations-dep', TOP_DEP);
+renderStations('stations-arr', TOP_ARR);
+</script>
+</body>
+</html>
