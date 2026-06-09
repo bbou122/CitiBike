@@ -4,7 +4,7 @@
 
 A complete analysis of New York City's Citi Bike bike-share system across all of 2023 — built by processing the raw trip data in a streaming pipeline, aggregating on the fly, and presenting findings in a fully offline, dependency-free dashboard.
 
-🔗 **[View the live dashboard →](https://bradenbourg.github.io/citibike-2023)**
+🔗 **[View the live dashboard →](https://bbou122.github.io/CitiBike/)**
 
 ---
 
