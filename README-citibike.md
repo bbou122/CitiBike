@@ -108,21 +108,8 @@ Electric bikes entered 2023 at exact parity with classic bikes (50.2% in January
 
 ---
 
-## How to View
-
-Clone or download the repo and open `citibike-2023.html` directly in a browser. No web server or installation needed.
-
-```bash
-git clone https://github.com/bradenbourg/citibike-2023
-open citibike-2023.html
-```
-
-Or visit the live GitHub Pages version: **[bradenbourg.github.io/citibike-2023](https://bradenbourg.github.io/citibike-2023)**
-
----
-
 ## About
 
-**Braden Bourg** — data analyst with a focus on large-scale public datasets, urban systems, and clear visual communication.
+**Braden Bourgeois** — data analyst who wants to get hired.
 
-[braden.bourg@gmail.com](mailto:braden.bourg@gmail.com) · [GitHub](https://github.com/bradenbourg)
+[braden.bourg@gmail.com](mailto:braden.bourg@gmail.com) 
