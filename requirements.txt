@@ -1,0 +1,7 @@
+# No third-party dependencies required.
+#
+# aggregate.py uses only Python standard library modules:
+#   zipfile, io, csv, json, datetime, calendar, time
+#
+# Requires: Python 3.8+
+# Recommended: Python 3.10+ (for str | None type hint syntax)
